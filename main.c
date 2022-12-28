@@ -4,9 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+// toupper()
 #include <ctype.h>
 
-#define TASK 1
+#define TASK 2
 
 #define ALPHABET_SIZE 26
 #define MIN_SHIFT 1
@@ -18,7 +20,6 @@ char encrypt(char ch, int shift);
 #if TASK == 1
 int main(int argc, char* argv[])
 {
-
     //  Aufgabe 1:
 
     //Ausgabe der Parameter
@@ -27,6 +28,11 @@ int main(int argc, char* argv[])
         printf("Parameter %d: \"%s\"\n", i, argv[i]);
     }
 
+    return 0;
+}
+#elif TASK == 2
+int main(int argc, char const *argv[])
+{
     if (argc != 4)
     {
         printf("Falsche Anzahl von Argumenten!\n");
@@ -34,40 +40,47 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    // Wandelt den Verschiebungswert in eine ganze Zahl um
+    // Wandelt den Verschiebungswert in eine ganze Zahl um; ascii zu int
     int shift = atoi(argv[3]);
+
     if (shift < MIN_SHIFT || shift > MAX_SHIFT)
     {
         printf("Ungültiger Verschiebungswert! Erlaubte Werte sind 1 bis 25.\n");
-        return 1;
+
+        // return 1 wie in der main aus stdlib
+        exit(EXIT_FAILURE);
     }
 
     // Öffnet die Eingabedatei im Lesemodus
-    FILE* input = fopen(argv[1], "r");
+    FILE *input = fopen(argv[1], "r");
+
     if (input == NULL)
     {
         printf("Kann Eingabedatei %s nicht öffnen!\n", argv[1]);
-        return 1;
+        exit(EXIT_FAILURE);
     }
 
     // Öffnet die Ausgabedatei im Schreibmodus
-    FILE* output = fopen(argv[2], "w");
+    FILE *output = fopen(argv[2], "w");
     if (output == NULL)
     {
         printf("Kann Ausgabedatei %s nicht öffnen!\n", argv[2]);
         fclose(input);
-        return 1;
+        exit(EXIT_FAILURE);
     }
 
     // Liest die Eingabedatei Zeile für Zeile und schreibt die verschlüsselten Zeichen in die Ausgabedatei
-    char ch;
-    while ((ch = fgetc(input)) != EOF);
+    char ch = '\0';
 
-    return 0;
-}
-#elif TASK == 2
-int main(int argc, char const *argv[])
-{
+    while ((ch = fgetc(input)) != EOF)
+    {
+        char encrypted_char = encrypt(ch, shift);
+        fputc(encrypted_char, output);
+    }
+
+    fclose(input);
+    fclose(output);
+
     return 0;
 }
 #elif TASK == 3
@@ -88,8 +101,13 @@ char encrypt(char ch, int shift)
         ch = toupper(ch);
 
         // Verschiebt das Zeichen um den angegebenen Wert
+        // Buchstaben in ch und zieht A ab (-65) und au die zB 6 (G) rechnen wird dann shift rauf und dann mod Alphabet
+        // um zu "rotieren"  Z=26 + shift 5 = 31 -> kein Buchstabe, sollte aber 5 sein, dort kommen wird durch mod hin,
+        // denn wir bekommen dann den Rest 5 zurück und gehen somit auf den folgenden Buchstaben zb E und + A um
+        // auf den richtigen ascii Wert zu kommen
         ch = ((ch - 'A') + shift) % ALPHABET_SIZE + 'A';
     }
+
     return ch;
 }
 //😜😈😈😈😈
