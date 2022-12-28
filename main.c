@@ -5,12 +5,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-
 // toupper()
+#include <string.h>
+// isalpha()
 #include <ctype.h>
+#include <stdbool.h>
 
-#define TASK 2
+#define TASK 3
 
 #define ALPHABET_SIZE 26
 #define MIN_SHIFT 1
@@ -35,6 +36,7 @@ int main(int argc, char* argv[])
 #elif TASK == 2
 int main(int argc, char const *argv[])
 {
+    // Vier argumente sind erforderlich
     if (argc != 4)
     {
         printf("Falsche Anzahl von Argumenten!\n");
@@ -74,9 +76,13 @@ int main(int argc, char const *argv[])
     // Liest die Eingabedatei Zeile für Zeile und schreibt die verschlüsselten Zeichen in die Ausgabedatei
     char ch = '\0';
 
+    // fgetc liest einen Buchstaben und speichert diesen in ch
+    // danach überprüft er ob der Buchstabe EndofFile ist, falls nein wird der Buchstabe verschlüsselt
     while ((ch = fgetc(input)) != EOF)
     {
+        // ch wird verschlüsselt
         char encrypted_char = encrypt(ch, shift);
+        // verschlüsselter Buchstabe wird in Output geschrieben
         fputc(encrypted_char, output);
     }
 
@@ -89,24 +95,14 @@ int main(int argc, char const *argv[])
 }
 #elif TASK == 3
 // Funktion zum Suchen eines bestimmten Werts in einem int-Vektor
-int *find_int(int value, int* vec, int vec_len) {
-  // Iterieren Sie durch jedes Element des Vektors
-    for (int i = 0; i < vec_len; i++) {
-    // Wenn das aktuelle Element dem gesuchten Wert entspricht,
-    // gib den Zeiger auf das Element zurück
-    if (vec[i] == value)
-    {
-        return &vec[i];
-    }
-    }
-    // Wenn der Wert nicht gefunden wurde, gib NULL zurück
-    return NULL;
-}
+int *find_int(int value, int* vec, int vec_len);
 
-int main() {
+int main()
+{
     // Beispielvektor mit int-Elementen
     int vec[] = {1, 2, 3, 4, 5, 1, 2, 3};
-    int vec_len = sizeof(vec) / sizeof(*vec);
+    // Dadurch brechenen wir 8
+    int vec_len = sizeof(vec) / sizeof(vec[0]);
 
     // Elemente des Vektors anzeigen
     printf("Elements of the vector: ");
@@ -118,24 +114,78 @@ int main() {
 
     // Anwender zur Eingabe eines Werts auffordern
     int value;
-    printf("Enter a value to search for: ");
-    while (scanf("%d", &value) == 1)
+    bool repeat = true;
+
+    do
     {
+        // Frage Zahl vom User ab
+        printf("Enter a value to search for: ");
+        int ret_val = scanf("%d", &value);
+
+        if (ret_val != 1)
+        {
+            printf("Bitte eine Zahl eingeben.\n");
+            exit(EXIT_FAILURE);
+        }
+
         // Aufruf von find_int(), um die Positionen des Werts im Vektor zu finden
-        int* pos = find_int(value, vec, vec_len);
-        while (pos != NULL) {
+        int *pos = find_int(value, vec, vec_len);
+
+        // Falls gefunden, dann ist pos ein pointer
+        // Falls nicht, dann ist pos NULL
+        while (pos != NULL)
+        {
             // Wenn der Wert gefunden wurde, die Position anzeigen und weitersuchen
             printf("Value found at position %ld at address: %p\n", pos - vec + 1, pos);
+
+            // Gehe zum nächsten Wert im Array
             pos++;
-            pos = find_int(value, pos, vec_len - (pos - vec));
+
+            // Rufe find_int erneut auf mit restlichem Array
+            int size_of_remaining_array =  vec_len - (pos - vec);
+            pos = find_int(value, pos, size_of_remaining_array);
         }
-        // Anwender zur Eingabe eines neuen Werts auffordern
-        printf("Enter a value to search for: ");
-    }
+
+        char user_input = '\0';
+        printf("Search again? [y/n] ");
+
+        // Clear input buffer
+        char buffer[1024];
+        fgets(buffer, sizeof(buffer), stdin);
+
+        int ret_val_2 = scanf("%c", &user_input);
+        printf("%c\n", user_input);
+
+        if (user_input == 'y')
+        {
+            repeat = true;
+        }
+        else
+        {
+            repeat = false;
+        }
+    } while (repeat);
 
     return 0;
 }
 
+// Funktion zum Suchen eines bestimmten Werts in einem int-Vektor
+int *find_int(int value, int* vec, int vec_len)
+{
+    // Iterieren Sie durch jedes Element des Vektors
+    for (int i = 0; i < vec_len; i++)
+    {
+        // Wenn das aktuelle Element dem gesuchten Wert entspricht,
+        // gib den Zeiger auf das Element zurück
+        if (vec[i] == value)
+        {
+            return &vec[i];
+        }
+    }
+
+    // Wenn der Wert nicht gefunden wurde, gib NULL zurück
+    return NULL;
+}
 #endif
 
 // Verschlüsselt oder entschlüsselt ein gegebenes Zeichen nach dem Cäsar-Verschlüsselungsverfahren
@@ -153,6 +203,7 @@ char encrypt(char ch, int shift)
         // um zu "rotieren"  Z=26 + shift 5 = 31 -> kein Buchstabe, sollte aber 5 sein, dort kommen wird durch mod hin,
         // denn wir bekommen dann den Rest 5 zurück und gehen somit auf den folgenden Buchstaben zb E und + A um
         // auf den richtigen ascii Wert zu kommen
+        // https://ascii50.firebaseapp.com/
         ch = ((ch - 'A') + shift) % ALPHABET_SIZE + 'A';
     }
 
