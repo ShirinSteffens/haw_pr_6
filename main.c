@@ -8,7 +8,7 @@
 // toupper()
 #include <ctype.h>
 
-#define TASK 2
+#define TASK 3
 
 #define ALPHABET_SIZE 26
 #define MIN_SHIFT 1
@@ -84,10 +84,50 @@ int main(int argc, char const *argv[])
     return 0;
 }
 #elif TASK == 3
-int main(int argc, char const *argv[])
-{
-    return 0;
+// Funktion zum Suchen eines bestimmten Werts in einem int-Vektor
+int* find_int(int value, int* vec, int vec_len) {
+  // Iterieren Sie durch jedes Element des Vektors
+  for (int i = 0; i < vec_len; i++) {
+    // Wenn das aktuelle Element dem gesuchten Wert entspricht,
+    // gib den Zeiger auf das Element zurück
+    if (vec[i] == value) {
+      return &vec[i];
+    }
+  }
+  // Wenn der Wert nicht gefunden wurde, gib NULL zurück
+  return NULL;
 }
+
+int main() {
+  // Beispielvektor mit int-Elementen
+  int vec[] = {1, 2, 3, 4, 5, 1, 2, 3};
+  int vec_len = sizeof(vec) / sizeof(int);
+
+  // Elemente des Vektors anzeigen
+  printf("Elements of the vector: ");
+  for (int i = 0; i < vec_len; i++) {
+    printf("%d ", vec[i]);
+  }
+  printf("\n");
+
+  // Anwender zur Eingabe eines Werts auffordern
+  int value;
+  printf("Enter a value to search for: ");
+  while (scanf("%d", &value) == 1) {
+    // Aufruf von find_int(), um die Positionen des Werts im Vektor zu finden
+    int* pos = find_int(value, vec, vec_len);
+    while (pos != NULL) {
+      // Wenn der Wert gefunden wurde, die Position anzeigen und weitersuchen
+      printf("Value found at position %ld\n", pos - vec);
+      pos = find_int(value, pos + 1, vec_len - (pos - vec) - 1);
+    }
+    // Anwender zur Eingabe eines neuen Werts auffordern
+    printf("Enter a value to search for: ");
+  }
+
+  return 0;
+}
+
 #endif
 
 // Verschlüsselt oder entschlüsselt ein gegebenes Zeichen nach dem Cäsar-Verschlüsselungsverfahren
